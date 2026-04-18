@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Smart Task Manager</title>
+  <meta name="description" content="A beautiful, feature-rich task manager with full CRUD functionality. Create, view, update, and delete tasks effortlessly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+          </svg>
+        </div>
+        <span class="brand-name">TaskFlow</span>
+      </div>
+      <div class="header-stats">
+        <div class="stat-pill" id="stat-total">
+          <span class="stat-num" id="count-total">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-pill active" id="stat-pending">
+          <span class="stat-num" id="count-pending">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-pill done" id="stat-done">
+          <span class="stat-num" id="count-done">0</span>
+          <span class="stat-label">Done</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Create / Edit Form Panel -->
+      <section class="panel form-panel" aria-label="Task form">
+        <div class="panel-header">
+          <h2 class="panel-title" id="form-title">✨ New Task</h2>
+          <button class="btn-icon cancel-btn hidden" id="cancel-edit-btn" title="Cancel editing" aria-label="Cancel editing">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <form id="task-form" novalidate>
+          <input type="hidden" id="edit-id" value="" />
+
+          <div class="form-group">
+            <label for="task-title" class="form-label">Task Title <span class="required">*</span></label>
+            <input type="text" id="task-title" class="form-input" placeholder="What needs to be done?" maxlength="100" required />
+            <span class="char-count" id="title-count">0/100</span>
+          </div>
+
+          <div class="form-group">
+            <label for="task-desc" class="form-label">Description</label>
+            <textarea id="task-desc" class="form-input form-textarea" placeholder="Add more details..." maxlength="300" rows="3"></textarea>
+            <span class="char-count" id="desc-count">0/300</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="task-priority" class="form-label">Priority</label>
+              <select id="task-priority" class="form-input form-select">
+                <option value="low">🟢 Low</option>
+                <option value="medium" selected>🟡 Medium</option>
+                <option value="high">🔴 High</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-category" class="form-label">Category</label>
+              <select id="task-category" class="form-input form-select">
+                <option value="personal">🏠 Personal</option>
+                <option value="work" selected>💼 Work</option>
+                <option value="study">📚 Study</option>
+                <option value="health">💪 Health</option>
+                <option value="other">📌 Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="task-due" class="form-label">Due Date</label>
+            <input type="date" id="task-due" class="form-input" />
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span id="submit-label">Add Task</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Task List Panel -->
+      <section class="panel list-panel" aria-label="Task list">
+        <div class="panel-header">
+          <h2 class="panel-title">📋 My Tasks</h2>
+          <div class="list-controls">
+            <div class="search-wrap">
+              <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="search" id="search-input" class="search-input" placeholder="Search tasks..." aria-label="Search tasks" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters" role="group" aria-label="Filter tasks">
+          <button class="filter-btn active" data-filter="all" id="filter-all">All</button>
+          <button class="filter-btn" data-filter="pending" id="filter-pending">Pending</button>
+          <button class="filter-btn" data-filter="completed" id="filter-completed">Done</button>
+          <button class="filter-btn" data-filter="high" id="filter-high">🔴 High</button>
+        </div>
+
+        <!-- Sort -->
+        <div class="sort-row">
+          <label for="sort-select" class="sort-label">Sort by:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Priority</option>
+            <option value="due">Due Date</option>
+            <option value="az">A → Z</option>
+          </select>
+          <button class="btn-text danger" id="clear-all-btn" title="Delete all tasks">Clear All</button>
+        </div>
+
+        <!-- Task Container -->
+        <div class="task-list" id="task-list" role="list" aria-live="polite">
+          <!-- Tasks rendered by JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="empty-state">
+          <div class="empty-icon">🎯</div>
+          <h3>No tasks found</h3>
+          <p>Create your first task using the form on the left!</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Edit / Delete Modal -->
+  <div class="modal-overlay hidden" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-task-title">
+    <div class="modal" id="detail-modal">
+      <button class="modal-close" id="modal-close-btn" aria-label="Close modal">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div class="modal-badge" id="modal-priority-badge">High</div>
+      <h3 class="modal-task-title" id="modal-task-title">Task Details</h3>
+      <p class="modal-task-desc" id="modal-task-desc"></p>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="modal-edit-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit Task
+        </button>
+        <button class="btn btn-danger" id="modal-delete-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+          </svg>
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
